@@ -3,7 +3,7 @@ $(document).ready(function () {
         e.preventDefault();
         e.stopImmediatePropagation();
         $.ajax({
-            url: "Empresa/crud/addEmpresa.php",
+            url: "Empresa/crud/CrudEmpresa.php",
             method: "POST",
             data: $("#addEmpresaForm").serialize(),
             success: function (response) {
@@ -17,6 +17,7 @@ $(document).ready(function () {
                         timer: 3000
                     });
                 } else {
+                    console.log(response);
                     Swal.fire({
                         position: 'center',
                         icon: 'error',
@@ -28,9 +29,9 @@ $(document).ready(function () {
                 }
             }
         });
-        setTimeout(function () {
-            window.location.reload(1);
-        }, 3000);
+        // setTimeout(function () {
+        //     window.location.reload(1);
+        // }, 3000);
     });
 });
 

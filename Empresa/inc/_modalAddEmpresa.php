@@ -11,7 +11,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-12">
-                            <input type="hidden" name="Id" value="@item.Id" />
+                            <input type="hidden" name="acao" value="adicionar" />
                             <div class="card">
                                 <div class="card-body">
                                     <div class="form-row">

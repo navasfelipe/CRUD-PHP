@@ -1,50 +1,66 @@
 <?php
 class Empresa
 {
+    private $id;
     private $nome;
     private $cpfCnpj;
     private $municipio;
     private $rg;
     private $pj;
     private $dtNascimento;
+    private $acao;
 
-    public function __construct($nome = '', $cpfCnpj = '', $municipio = '', $rg = '', $pj = '', $dtNascimento = '')
+    public function __construct($id = null, $nome = '', $cpfCnpj = '', $municipio = '', $rg = '', $pj = null, $dtNascimento = '', $acao = '')
     {
+        $this->id = $id;
         $this->nome = $nome;
         $this->cpfCnpj = $cpfCnpj;
         $this->municipio = $municipio;
         $this->rg = $rg;
         $this->pj = $pj;
         $this->dtNascimento = $dtNascimento;
+        $this->acao = $acao;
     }
     public function ValidarDados()
     {
-        try {
-            $erro = "Você não preencheu o(s) campo(s): ";
-            $validacao = True;
-            if (empty($this->nome)) {
-                $erro .= 'nome';
-                $validacao = False;
-            }
-            if (empty($this->cpfCnpj)) {
-                $erro .= ' + CPF/CNPJ';
-                $validacao = False;
-            }
-            if (empty($this->municipio)) {
-                $erro .= ' + Município';
-                $validacao = False;
-            }
-            if (empty($this->rg) && $this->pj == false) {
-                $erro .= ' + RG';
-                $validacao = False;
-            }
-            if (empty($this->dtNascimento) && $this->pj == false) {
-                $erro .= ' + Data de Nascimento';
-                $validacao = False;
-            }
-            return $validacao;
-        } catch (Exception $e) {
-            return $e;
+        if (!empty($this->id) && $this->acao == 'remover') {
+            return true;
+        } elseif (!empty($this->id) && empty($this->acao)) {
+            $erro = "Necessário especificar uma ação";
+            throw new Error($erro . $this->id . $this->acao);
+            return false;
+        } elseif (!empty($this->id) && ($this->acao != 'atualizar' || $this->acao != 'ler')) {
+            $erro = "Ação não permitida";
+            throw new Error($erro);
+            return false;
+        }
+
+        $erro = "Você não preencheu o(s) campo(s): ";
+        $validacao = True;
+        if (empty($this->nome)) {
+            $erro .= 'nome';
+            $validacao = False;
+        }
+        if (empty($this->cpfCnpj)) {
+            $erro .= ' + CPF/CNPJ';
+            $validacao = False;
+        }
+        if (empty($this->municipio)) {
+            $erro .= ' + Município';
+            $validacao = False;
+        }
+        if (empty($this->rg) && $this->pj == false) {
+            $erro .= ' + RG';
+            $validacao = False;
+        }
+        if (empty($this->dtNascimento) && $this->pj == false) {
+            $erro .= ' + Data de Nascimento';
+            $validacao = False;
+        }
+        if ($validacao) {
+            return true;
+        } else {
+            throw new Error($erro);
         }
     }
 
@@ -73,7 +89,7 @@ class Empresa
             $qSqlEmpresaExiste->execute(array($this->nome, $this->cpfCnpj));
             $retornoEmpresaExiste = $qSqlEmpresaExiste->fetch(PDO::FETCH_ASSOC);
             Banco::desconectar();
-            if (count($retornoEmpresaExiste) > 0) {
+            if (!empty($retornoEmpresaExiste)) {
                 return true;
             }
         } catch (PDOException $exception) {
