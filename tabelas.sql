@@ -3,7 +3,8 @@ CREATE TABLE `contatos` (
   `empresaId` int(11) NOT NULL,
   `nome` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
   `dtNascimento` datetime NOT NULL,
-  `dtCadastro` datetime NOT NULL
+  `dtCadastro` datetime NOT NULL,
+  `dtAlteracao` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `empresas` (
