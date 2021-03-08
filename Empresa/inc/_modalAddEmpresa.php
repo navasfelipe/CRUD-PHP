@@ -27,8 +27,8 @@
                                             <input type="text" class="form-control" id="nome" name="nome" required>
                                         </div>
                                         <div class="form-group col-md-6">
-                                            <label for="municipio" class="col-form-label">Cidade</label>
-                                            <input type="text" class="form-control" id="municipio" name="municipio" value="" required>
+                                            <label for="cidade" class="col-form-label">Cidade</label>
+                                            <input type="text" class="form-control" id="cidade" name="cidade" value="" required>
                                         </div>
                                         <div class="form-group col-md-6">
                                             <label for="cpfCnpj" id="labelCpfCnpj" class="col-form-label">CNPJ</label>

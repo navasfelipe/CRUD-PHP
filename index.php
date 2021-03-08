@@ -1,14 +1,25 @@
 <?php
 include("_top.php");
+require_once('bd/banco.php');
+require_once('Classes/ClassEmpresa.php');
 ?>
-
-
 
 </br>
 <div class="row">
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalUnidade">
-        Adicionar Empresa
-    </button>
+    <div class="col-lg-6  mb-3">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalUnidade">
+            Adicionar Empresa
+        </button>
+    </div>
+    <div class="col-lg-6  mb-3 text-right">
+        <form id="formBusca">
+            <input type="hidden" name="acao" id="acao" value="busca">
+            <input type="text" name="busca" class="form" id="busca" placeholder="Pesquisar por Nome, CPF ou CNPJ">
+
+            <input type="submit" name="submitBusca" id="submitBusca" value="Pesquisar">
+        </form>
+    </div>
+
     <table class="table table-striped">
         <thead>
             <tr>
@@ -23,48 +34,44 @@ include("_top.php");
         </thead>
         <tbody>
             <?php
-            include 'bd/banco.php';
-            $pdo = Banco::conectar();
-            $sql = 'SELECT * FROM empresas ORDER BY id DESC';
-            $collection = $pdo->query($sql)->fetchAll();
-            if (count($collection) != 0 || !empty($collection)) {
-
-                foreach ($collection as $row) {
-                    if ($row['rg'] == null) {
-                        echo '<tr id="empresa_' . $row['id'] . '">';
-                        echo '<th scope="row">' . $row['id'] . '</th>';
-                        echo '<td>' . $row['nome'] . '</td>';
-                        echo '<td>' . $row['cpfCnpj'] . '</td>';
-                        echo '<td>' . $row['municipio'] . '</td>';
-                        echo '<td>' . 'N/A' . '</td>';
-                        echo '<td>' . 'N/A' . '</td>';
-                        echo '<td width=250>';
-                        echo '<a class="btn btn-primary" href="Empresa/detalheEmpresa.php?id=' . $row['id'] . '">Info</a>';
-                        echo ' ';
-                        echo '<a class="btn btn-warning" href="update.php?id=' . $row['id'] . '">Atualizar</a>';
-                        echo ' ';
-                        echo '<a class="btn btn-danger" href="javascript:void()" onclick="deletarEmpresa(' . $row['id'] . ')">Excluir</a>';
-                        echo '</td>';
-                        echo '</tr>';
+            $instancia = new Empresa();
+            $linhasEmpresas = $instancia->listarEmpresas();
+            if (count($linhasEmpresas) != 0 || !empty($linhasEmpresas)) {
+                foreach ($linhasEmpresas as $linha) {
+                    if ($linha['rg'] == null) {
+            ?>
+                        <tr id='<?php echo "empresa_" . $linha['id'] ?>'>
+                            <th scope="row"><?php echo $linha['id'] ?></th>
+                            <td><?php echo $linha['nome'] ?></td>
+                            <td><?php echo $linha['cpfCnpj'] ?></td>
+                            <td><?php echo $linha['cidade'] ?></td>
+                            <td>N/A</td>
+                            <td>N/A</td>
+                            <td width=250>
+                                <a class="btn btn-primary" href="Empresa/detalheEmpresa.php?id=<?php echo $linha['id'] ?>">Info</a>
+                                &nbsp;
+                                <a class="btn btn-danger" href="javascript:void()" onclick='<?php echo 'deletarEmpresa(' . $linha['id'] . ')' ?>'>Excluir</a>
+                            </td>
+                        </tr>
+                    <?php
                     } else {
-                        echo '<tr>';
-                        echo '<th scope="row">' . $row['id'] . '</th>';
-                        echo '<td>' . $row['nome'] . '</td>';
-                        echo '<td>' . $row['cpfCnpj'] . '</td>';
-                        echo '<td>' . $row['municipio'] . '</td>';
-                        echo '<td>' . $row['rg'] . '</td>';
-                        echo '<td>' . $row['dtNascimento'] . '</td>';
-                        echo '<td width=250>';
-                        echo '<a class="btn btn-primary" href="Empresa/detalheEmpresa.php?id=' . $row['id'] . '">Info</a>';
-                        echo ' ';
-                        echo '<a class="btn btn-warning" href="update.php?id=' . $row['id'] . '">Atualizar</a>';
-                        echo ' ';
-                        echo '<a class="btn btn-danger" href="javascript:void()" onclick="deletarEmpresa(' . $row['id'] . ')">Excluir</a>';
-                        echo '</td>';
-                        echo '</tr>';
+                    ?>
+                        <tr id='<?php echo "empresa_" . $linha['id'] ?>'>
+                            <th scope="row"><?php echo $linha['id'] ?></th>
+                            <td><?php echo $linha['nome'] ?></td>
+                            <td><?php echo $linha['cpfCnpj'] ?></td>
+                            <td><?php echo $linha['cidade'] ?></td>
+                            <td><?php echo $linha['rg'] ?></td>
+                            <td><?php echo $linha['dtNascimento'] ?></td>
+                            <td width=250>
+                                <a class="btn btn-primary" href="Empresa/detalheEmpresa.php?id=<?php echo $linha['id'] ?>">Info</a>
+                                &nbsp;
+                                <a class="btn btn-danger" href="javascript:void()" onclick='<?php echo 'deletarEmpresa(' . $linha['id'] . ')' ?>'>Excluir</a>
+                            </td>
+                        </tr>
+            <?php
                     }
                 }
-                Banco::desconectar();
             } else {
                 echo
                 "<tr>

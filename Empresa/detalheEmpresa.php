@@ -1,158 +1,176 @@
 <?php
-
-require '../bd/banco.php';
-
-$id = null;
-if (!empty($_GET['id'])) {
-    $id = $_REQUEST['id'];
-}
-
-if (null == $id) {
-    header("Location: index.php");
-} else {
-    $pdo = Banco::conectar();
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    //dados da empresa
-    $sqlEmpresa = "SELECT * FROM empresas where id = ?";
-    $qEmpresa = $pdo->prepare($sqlEmpresa);
-    $qEmpresa->execute(array($id));
-    $rowEmpresa = $qEmpresa->fetch(PDO::FETCH_ASSOC);
-
-    //dados dos contatos
-    $sqlContatos = "SELECT * FROM contatos where empresaId = ?";
-    $qContatos = $pdo->prepare($sqlContatos);
-    $qContatos->execute(array($rowEmpresa['id']));
-    $rowContatos = $qContatos->fetchAll(PDO::FETCH_ASSOC);
-    Banco::desconectar();
-}
-?>
-
-<?php
 include("../_top.php");
+require_once('../bd/banco.php');
+require_once('../Classes/ClassEmpresa.php');
+require_once('../Classes/ClassContato.php');
 ?>
 
 </br>
-<div class="row">
-    <div class="col-lg-12 text-center">
-        <h3 class="text-center">Informações gerais</h3>
+<?php
+try {
+    $instanciaEmpresa = new Empresa();
+    $linhaEmpresa = $instanciaEmpresa->detalheEmpresa($_GET['id']);
+    $instanciaContatos = new Contato();
+    $linhasContatos = $instanciaContatos->listarContatos($_GET['id']);
+} catch (Exception $e) {
+    echo $e;
+}
+if (!empty($instanciaEmpresa)) {
+?>
+    <div class="row">
+        <div class="col-12">
+            <h4 class="text-center">Informações Gerais</h4>
+            <form id="atualizarEmpresaForm">
+                <input type="hidden" name="acao" value="atualizar" />
+                <input type="hidden" name="id" value='<?php echo $linhaEmpresa['id'] ?>' />
+                <div class="card">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="cpfCnpj" class="col-form-label">PF/PJ</label>
+                                <select onchange="mudarPfPj(this.value)" id="pfPj" class="form-control selectpicker required" required name="pj" required>
+                                    <?php
+                                    if (!empty($linhaEmpresa['rg'])) {
+                                    ?>
+                                        <option value='true'>Pessoa Jurídica</option>
+                                        <option value="false" selected>Pessoa Física</option>
+                                    <?php
+                                    } else {
+                                    ?>
+                                        <option value='true' selected>Pessoa Jurídica</option>
+                                        <option value="false">Pessoa Física</option>
+                                    <?php
+                                    }
+                                    ?>
+
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="nome" id="labelNome" class="col-form-label">Nome Fantasia</label>
+                                <input type="text" class="form-control" id="nome" name="nome" value='<?php echo $linhaEmpresa['nome'] ?>' required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="cidade" class="col-form-label">Cidade</label>
+                                <input type="text" class="form-control required" id="cidade" name="cidade" value='<?php echo $linhaEmpresa['cidade'] ?>' required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="cpfCnpj" id="labelCpfCnpj" class="col-form-label">CNPJ</label>
+                                <input type="text" class="form-control" id="cpfCnpj" name="cpfCnpj" value='<?php echo $linhaEmpresa['cpfCnpj'] ?>' required>
+                            </div>
+                        </div>
+                        <div class="form-row" id="pf_invisible" style="display:none">
+                            <div class="form-group col-md-6">
+                                <label for="rg" class="col-form-label">Documento de Identidade</label>
+                                <input type="text" class="form-control" id="rg" name="rg" value='<?php echo $linhaEmpresa['rg'] ?>'>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="dtNascimento" class="col-form-label">Data de Nascimento</label>
+                                <input type="date" class="form-control" id="dtNascimento" name="dtNascimento" value='<?php echo $linhaEmpresa['dtNascimento'] ?>'>
+                            </div>
+                        </div>
+                        </br>
+                        <div class="form-row">
+                            <div class="form-group col-md-12 text-center">
+                                <button type="submit" id="submitAtualizarEmpresa" class="btn btn-primary font-weight-bold">Atualizar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
+<?php
+}
+?>
+<div class="row pt-5 pb-5">
+    <div class="col-12">
+        <h4 class="text-center">Informações de Contatos</h4>
+        <button type="button" class="btn btn-primary mb-4" data-toggle="modal" data-target="#modalContato">
+            Adicionar Contato
+        </button>
+        <div class="card">
+            <table class="table table-striped pb-6 mb-4">
+                <thead>
+                    <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Nome</th>
+                        <th scope="col">Cidade</th>
+                        <th scope="col">Data de Cadastro</th>
+                        <th scope="col">Data de Atualização</th>
+                        <th scope="col">Telefones</th>
+                        <th scope="col">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    if (!empty($linhasContatos)) {
+                        foreach ($linhasContatos as $linhaContato) {
+                    ?>
+                            <tr id='contato_<?php echo $linhaContato['id'] ?>'>
+                                <th scope="row"><?php echo $linhaContato['id'] ?></th>
+                                <td><?php echo $linhaContato['nome'] ?></td>
+                                <td><?php echo $linhaContato['cidade'] ?></td>
+                                <td><?php echo $linhaContato['dtCadastro'] ?></td>
+                                <td><?php echo $linhaContato['dtAlteracao'] ?></td>
+                                <td>
+                                    <?php
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">Id</th>
-                <th scope="col">Nome</th>
-                <th scope="col">CPF/CNPJ</th>
-                <th scope="col">Município</th>
-                <th scope="col">RG</th>
-                <th scope="col">Data de Nascimento</th>
-                <th scope="col">Ação</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            if (count($rowEmpresa) != 0 || !empty($rowEmpresa)) {
+                                    $instanciaContatos->listarTelefones($linhaContato['id']);
+                                    if (!empty($linhasTelefones)) {
+                                        foreach ($linhasTelefones as $telefone) {
+                                            echo $telefone['numeroTelefone'];
+                                            echo "<br />";
+                                        }
+                                    } else {
+                                        echo 'Nenhum telefone cadastrado';
+                                    }
 
-                if ($rowEmpresa['rg'] == null) {
-                    echo '<tr id="empresa_' . $rowEmpresa['id'] . '">';
-                    echo '<th scope="row">' . $rowEmpresa['id'] . '</th>';
-                    echo '<td>' . $rowEmpresa['nome'] . '</td>';
-                    echo '<td>' . $rowEmpresa['cpfCnpj'] . '</td>';
-                    echo '<td>' . $rowEmpresa['municipio'] . '</td>';
-                    echo '<td>' . 'N/A' . '</td>';
-                    echo '<td>' . 'N/A' . '</td>';
-                    echo '<td width=250>';
-                    echo '<a class="btn btn-primary" class="btn btn-primary" href="javascript:void()" data-toggle="modal" data-target="#modalEditEmpresa">Editar Empresa</a>';
-                    echo ' ';
-                    echo '<a class="btn btn-danger" href="javascript:void()" onclick="deletarEmpresa(' . $rowEmpresa['id'] . ')">Excluir</a>';
-                    echo '</td>';
-                    echo '</tr>';
-                } else {
-                    echo '<tr>';
-                    echo '<th scope="row">' . $rowEmpresa['id'] . '</th>';
-                    echo '<td>' . $rowEmpresa['nome'] . '</td>';
-                    echo '<td>' . $rowEmpresa['cpfCnpj'] . '</td>';
-                    echo '<td>' . $rowEmpresa['municipio'] . '</td>';
-                    echo '<td>' . $rowEmpresa['rg'] . '</td>';
-                    echo '<td>' . $rowEmpresa['dtNascimento'] . '</td>';
-                    echo '<td width=250>';
-                    echo '<a class="btn btn-primary" class="btn btn-primary" href="javascript:void()" data-toggle="modal" data-target="#modalEditEmpresa">Editar Empresa</a>';
-                    echo ' ';
-                    echo '<a class="btn btn-danger" href="javascript:void()" onclick="deletarEmpresa(' . $rowEmpresa['id'] . ')">Excluir</a>';
-                    echo '</td>';
-                    echo '</tr>';
-                }
+                                    ?>
+                                </td>
+                                <td width=250>
+                                    <a class="btn btn-primary" href='<?php echo 'detalheContato.php?id=' . $linhaContato['id'] . '' ?>'>Editar</a>
+                                    <a class="btn btn-danger" href="javascript:void()" onclick='<?php echo 'deletarContato(' . $linhaContato['id'] . ' )' ?>'>Excluir</a>
+                                </td>
+                            </tr>
+                        <?php
+                        }
+                    } else {
+                        ?>
 
-                Banco::desconectar();
-            } else {
-                echo
-                "<tr class='text-center'>
-                    <td colspan='6'>Nenhum registro encontrado</td>
-                </tr>";
-            }
-            ?>
+                        <tr>
+                            <td colspan="6" class="text-center">Nenhum contato cadastrado</td>
+                        </tr>
+                        </ <?php
+                        }
+                            ?> </tbody>
+            </table>
 
-        </tbody>
-    </table>
-</div>
-<div class="row pt-4">
-    <div class="col-lg-12 text-center">
-        <h3 class="text-center">Informações de contatos</h3>
+        </div>
     </div>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">Id</th>
-                <th scope="col">Nome</th>
-                <th scope="col">Data e Hora de Cadastro</th>
-                <th scope="col">Data e Hora de Alteração</th>
-                <th scope="col">Telefones</th>
-                <th scope="col">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            if ($rowContatos != null && (count($rowContatos) != 0 || !empty($rowContatos))) {
-                for ($i = 0; $i < count($rowContatos); $i++) {
-                    echo '<tr id="empresa_' . $rowContatos[$i]['id'] . '">';
-                    echo '<th scope="row">' . $rowContatos[$i]['id'] . '</th>';
-                    echo '<td>' . $rowContatos[$i]['nome'] . '</td>';
-                    echo '<td>' . $rowContatos[$i]['dtCadastro'] . '</td>';
-                    echo '<td>' . $rowContatos[$i]['dtAlteracao'] . '</td>';
-                    $pdo = Banco::conectar();
-                    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                    $sqlTelefones = "SELECT * FROM telefones where contatoId = ?";
-                    $qTelefones = $pdo->prepare($sqlTelefones);
-                    $qTelefones->execute(array($rowContatos[$i]['id']));
-                    $rowTelefones = $qTelefones->fetchAll(PDO::FETCH_ASSOC);
-                    Banco::desconectar();
-                    echo '<td>';
-                    for ($j = 0; $j < count($rowTelefones); $j++) {
-                        echo $rowTelefones[$j]["numeroTelefone"];
-                    }
-                    echo '</td>';
-                    echo '<td width=250>';
-                    echo '<a class="btn btn-primary" class="btn btn-primary" href="javascript:void()" data-toggle="modal" data-target="#modalEditContato">Editar</a>';
-                    echo ' ';
-                    echo '<a class="btn btn-danger" href="javascript:void()" onclick="deletarContato(' . $rowContatos[$i]['id'] . ')">Excluir</a>';
-                    echo '</td>';
-                    echo '</tr>';
-                }
-            } else {
-                echo
-                "<tr class='text-center'>
-                    <td colspan='5'>Nenhum registro encontrado</td>
-                </tr>";
-            }
-            ?>
-
-        </tbody>
-    </table>
 </div>
+
+<script>
+    window.onload = function() {
+        var select = document.getElementById("pfPj");
+        var valor = select.options[select.selectedIndex].value;
+        var div = document.getElementById("pf_invisible")
+        if (valor == "true") {
+            $("#labelNome").html("");
+            $("#labelNome").append("Nome fantasia");
+            $("#labelCpfCnpj").html("");
+            $("#labelCpfCnpj").append("CNPJ");
+            div.style.display = "none";
+        } else {
+            $("#labelNome").html("");
+            $("#labelNome").append("Nome completo");
+            $("#labelCpfCnpj").html("");
+            $("#labelCpfCnpj").append("CPF");
+            div.style.display = "block";
+        }
+    };
+</script>
 
 <?php
-
 include("../_bottom.php");
-
+include('inc/_modalAddContato.php');
 ?>

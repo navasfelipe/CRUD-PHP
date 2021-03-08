@@ -14,7 +14,8 @@ Desenvolvimento de um simples projeto CRUD (cadastro de empresas com contatos e 
 ## Configuração do Projeto:
 
 - Executar a query tabelas.sql ou importar o arquivo no phpMyAdmin para criar as tabelas do projeto.
-- Editar o arquivo "bd/banco.php" 
+- Editar o arquivo "bd/banco.php"
+- criar a pasta "royal" na raiz e acessar via localhost/royal 
 
 ```
 $dbNome = 'nomeDaTable' 

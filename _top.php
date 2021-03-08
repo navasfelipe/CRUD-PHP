@@ -3,13 +3,13 @@
 
 <head>
     <meta charset="utf-8">
-    <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="/royal/assets/css/bootstrap.min.css" />
-    <title>Informações do Contato</title>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <title>Informações da Empresa</title>
 </head>
 
 <body>
     <div class="container">
         <div class="row">
-            <img src="/royal/assets/img/royal_logo.png" height="100" />
+            <a href="/royal/index.php"><img src="/royal/assets/img/royal_logo.png" height="100" /></a>
         </div>
