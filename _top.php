@@ -11,5 +11,5 @@
 <body>
     <div class="container">
         <div class="row">
-            <a href="/royal/index.php"><img src="/royal/assets/img/royal_logo.png" height="100" /></a>
+            <a href="/royal/index.php"><img src="" height="100" /></a>
         </div>
